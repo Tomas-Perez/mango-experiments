@@ -1,2 +1,12 @@
 *.json
+*.bin
+*.png
 __pycache__
+.vscode
+count_global_access
+figures
+hhal_profiling
+hotspot
+old
+pathfinder
+ptxs

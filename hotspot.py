@@ -1,7 +1,23 @@
 from benchmark import run_with_config
+import sys
+
+executables = {
+    'nvidia': {
+        'path': '/opt/mango/usr/bin/rodinia/cuda/rodinia_hotspot_cuda',
+        'save_to': 'hotspot/nvidia',
+    },
+    'opencl': {
+        'path': '/opt/mango/usr/bin/rodinia/opencl/rodinia_hotspot_opencl',
+        'save_to': 'hotspot/opencl',
+    },
+    'mango': {
+        'path': '/opt/mango/usr/bin/cuda_hotspot',
+        'save_to': 'hotspot/mango',
+    },
+}
 
 dims = [
-    {'size': 64, 'iterations': 10},
+    {'size': 64, 'iterations': 100},
     {'size': 128, 'iterations': 50},
     {'size': 256, 'iterations': 30},
     {'size': 512, 'iterations': 30},
@@ -11,8 +27,6 @@ dims = [
     {'size': 8192, 'iterations': 10},
 ]
 
-path = "/opt/mango/usr/bin/cuda_hotspot"
-
 run_configs = []
 for d in dims:
     s = d['size']
@@ -21,6 +35,11 @@ for d in dims:
     tfile = f"/opt/mango/usr/local/share/cuda_hotspot/data/temp_{s}.bin"
     pfile = f"/opt/mango/usr/local/share/cuda_hotspot/data/power_{s}.bin"
     cmd = f"{s} {pyramid_height} {total_iterations} {tfile} {pfile}"
-    run_configs.append({'params': cmd, 'iterations': d['iterations']})
+    if sys.argv[1] != 'mango':
+        run_configs.append({'params': f"{cmd} 0", 'iterations': d['iterations'], 'save_as': f"{s} 0"})
+        run_configs.append({'params': f"{cmd} 1", 'iterations': d['iterations'], 'save_as': f"{s} 1"})
+    else:
+        run_configs.append({'params': f"{cmd}", 'iterations': d['iterations'], 'save_as': f"{s}"})
 
-run_with_config(path, run_configs, 'hotspot-experiments')
+ex = executables[sys.argv[1]]
+run_with_config(ex['path'], run_configs, ex['save_to'], mango=True)
