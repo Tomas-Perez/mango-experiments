@@ -158,10 +158,10 @@ def stacked_bars(nvidia_ops_means, opencl_ops_means, mango_ops_means, hhal_ops_m
     width = 0.35
 
     fig, ax = plt.subplots()
-
-    ax.bar(labels, kernel_execution_means, width, label='Kernel Executions')
-    ax.bar(labels, buffer_write_means, width, bottom=kernel_execution_means, label='Buffer writes')
+    
     ax.bar(labels, buffer_read_means, width, bottom=[kernel_execution_means[i] + buffer_write_means[i] for i in range(len(kernel_execution_means))], label='Buffer reads')
+    ax.bar(labels, buffer_write_means, width, bottom=kernel_execution_means, label='Buffer writes')
+    ax.bar(labels, kernel_execution_means, width, label='Kernel Executions')
     ax.set_ylabel('Time (ms)')
     ax.set_xlabel("Programming Model")
     ax.set_title('Benchmark breakdown')

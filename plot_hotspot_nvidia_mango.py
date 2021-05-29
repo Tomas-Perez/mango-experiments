@@ -18,6 +18,7 @@ def get_data(exp_dir, mango=False):
     kernel_execs = []
     exp_sizes = []
     if mango:
+        resource_allocations = []
         buffer_reads_hhal = []
         buffer_writes_hhal = []
         kernel_execs_hhal = []
@@ -27,6 +28,8 @@ def get_data(exp_dir, mango=False):
         kernel_execs.append([])
         buffer_writes.append([])
         buffer_reads.append([])
+        if mango:
+            resource_allocations.append([])
         exp_sizes.append(size)
         for run in files_in_dir(f'{exp_dir}/{exp}'):
             with open(f'{exp_dir}/{exp}/{run}', 'r') as f:
@@ -37,6 +40,11 @@ def get_data(exp_dir, mango=False):
                     kernel_execs[idx].append(list(map(lambda x: x['duration'], run_data['kernel_executions'])))
                     buffer_reads[idx].append(list(map(lambda x: {'size': x['size'], 'duration': x['duration']}, run_data['buffer_reads'])))
                     buffer_writes[idx].append(list(map(lambda x: {'size': x['size'], 'duration': x['duration']}, run_data['buffer_writes'])))
+                    if mango:
+                        resource_allocations[idx].append(
+                            list(map(lambda x: x['duration'], run_data['resource_allocations'])) +
+                            list(map(lambda x: x['duration'], run_data['resource_deallocations']))
+                        )
         if mango:
             kernel_execs_hhal.append([])
             buffer_reads_hhal.append([])
@@ -49,7 +57,7 @@ def get_data(exp_dir, mango=False):
                     buffer_writes_hhal[idx].append(list(map(lambda x: {'size': x['size'], 'duration': x['duration']}, run_data['buffer_writes'])))
                 
     if mango:
-        return exp_sizes, total_durations, buffer_reads, buffer_writes, kernel_execs, buffer_reads_hhal, buffer_writes_hhal, kernel_execs_hhal
+        return exp_sizes, total_durations, buffer_reads, buffer_writes, kernel_execs, resource_allocations, buffer_reads_hhal, buffer_writes_hhal, kernel_execs_hhal
     else:
         return exp_sizes, total_durations, buffer_reads, buffer_writes, kernel_execs
                 
