@@ -60,4 +60,4 @@ def get_data(exp_dir, mango=False):
     else:
         return exp_sizes, total_durations, buffer_reads, buffer_writes, kernel_execs
     
-plot_results(exp_nvidia_dir, exp_mango_dir, exp_opencl_dir, get_data, 'pathfinder', buffer_write_unit='megabytes')
+plot_results(exp_nvidia_dir, exp_mango_dir, exp_opencl_dir, get_data, 'pathfinder', buffer_write_unit='megabytes', kernel_executions_time_unit='μs', buffer_reads_time_unit='μs')

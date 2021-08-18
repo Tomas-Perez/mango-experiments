@@ -121,15 +121,15 @@ def bars(title, y_label, save_name, nvidia_vals, mango_vals, hhal_vals, opencl_v
     hhal_std = np.std(hhal_vals)
     opencl_std = np.std(opencl_vals)
 
-    models = ['NVIDIA', 'OPENCL', 'MANGO', 'MANGO (No IPC)']
+    models = ['NVIDIA', 'OPENCL', 'MANGO']
     x_pos = np.arange(len(models))
 
-    means = [nvidia_mean, opencl_mean, mango_mean, hhal_mean]
-    error = [nvidia_std, opencl_std, mango_std, hhal_std]
+    means = [nvidia_mean, opencl_mean, hhal_mean]
+    error = [nvidia_std, opencl_std, hhal_std]
 
     fig, ax = plt.subplots()
     ax.yaxis.grid(True)
-    rects = ax.bar(x_pos, means, align='center', alpha=0.5, ecolor='black', color=['green', 'red', 'orange', 'blue'], capsize=10)
+    rects = ax.bar(x_pos, means, align='center', alpha=0.5, ecolor='black', color=['green', 'red', 'orange'], capsize=10)
     heights = list(map(lambda rect: rect.get_height(), rects))
     mean_height = np.mean(heights)
     max_height = 0
@@ -143,17 +143,17 @@ def bars(title, y_label, save_name, nvidia_vals, mango_vals, hhal_vals, opencl_v
     ax.set_xticks(x_pos)
     ax.set_xticklabels(models)
     ax.set_title(title)
-    
+        
     xmin, xmax, ymin, ymax = ax.axis()
     ax.axis([xmin, xmax, ymin, max_height * 1.1])
     tikz.save(f'{dest_dir}/{save_name}.tex')
     plt.show()
 
 def stacked_bars(nvidia_ops_means, opencl_ops_means, mango_ops_means, hhal_ops_means):
-    labels = ['NVIDIA', 'OPENCL', 'MANGO', 'MANGO (No IPC)']
-    kernel_execution_means = list(map(to_ms, [nvidia_ops_means[0], opencl_ops_means[0], mango_ops_means[0], hhal_ops_means[0]]))
-    buffer_write_means = list(map(to_ms, [nvidia_ops_means[1], opencl_ops_means[1], mango_ops_means[1], hhal_ops_means[1]]))
-    buffer_read_means = list(map(to_ms, [nvidia_ops_means[2], opencl_ops_means[2], mango_ops_means[2], hhal_ops_means[2]]))
+    labels = ['NVIDIA', 'OPENCL', 'MANGO']
+    kernel_execution_means = list(map(to_ms, [nvidia_ops_means[0], opencl_ops_means[0], hhal_ops_means[0]]))
+    buffer_write_means = list(map(to_ms, [nvidia_ops_means[1], opencl_ops_means[1], hhal_ops_means[1]]))
+    buffer_read_means = list(map(to_ms, [nvidia_ops_means[2], opencl_ops_means[2], hhal_ops_means[2]]))
 
     width = 0.35
 
@@ -161,12 +161,16 @@ def stacked_bars(nvidia_ops_means, opencl_ops_means, mango_ops_means, hhal_ops_m
     
     ax.bar(labels, buffer_read_means, width, bottom=[kernel_execution_means[i] + buffer_write_means[i] for i in range(len(kernel_execution_means))], label='Buffer reads')
     ax.bar(labels, buffer_write_means, width, bottom=kernel_execution_means, label='Buffer writes')
-    ax.bar(labels, kernel_execution_means, width, label='Kernel Executions')
+    ax.bar(labels, kernel_execution_means, width, label='Kernel executions')
     ax.set_ylabel('Time (ms)')
     ax.set_xlabel("Programming Model")
     ax.set_title('Benchmark breakdown')
     ax.yaxis.grid(True)
-    ax.legend()
+    # Shrink current axis by 30%
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.70, box.height])
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    tikz.save(f'{dest_dir}/breakdown.tex')
 
     plt.show()
 
